@@ -4,7 +4,7 @@
   "description": "Free Shorts & Reels video transcriber — English, Hindi, Hinglish",
   "private": true,
   "engines": {
-    "node": "18.x"
+    "node": "24.x"
   },
   "dependencies": {
     "yt-dlp-exec": "^1.0.2"
