@@ -1,19 +1,6 @@
 {
   "version": 2,
-  "builds": [
-    {
-      "src": "api/*.js",
-      "use": "@vercel/node",
-      "config": {
-        "includeFiles": ["node_modules/**"]
-      }
-    },
-    {
-      "src": "public/**",
-      "use": "@vercel/static"
-    }
-  ],
-  "routes": [
+    "routes": [
     { "src": "/api/transcribe", "dest": "/api/transcribe.js" },
     { "src": "/api/status", "dest": "/api/status.js" },
     { "src": "/(.*)", "dest": "/public/$1" }
