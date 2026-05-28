@@ -1,0 +1,16 @@
+{
+  "name": "reelscript-transcriber",
+  "version": "1.0.0",
+  "description": "Free Shorts & Reels video transcriber — English, Hindi, Hinglish",
+  "private": true,
+  "engines": {
+    "node": "18.x"
+  },
+  "dependencies": {
+    "yt-dlp-exec": "^1.0.2"
+  },
+  "scripts": {
+    "dev": "vercel dev",
+    "deploy": "vercel --prod"
+  }
+}
