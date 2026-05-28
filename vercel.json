@@ -1,0 +1,35 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "api/*.js",
+      "use": "@vercel/node",
+      "config": {
+        "includeFiles": ["node_modules/**"]
+      }
+    },
+    {
+      "src": "public/**",
+      "use": "@vercel/static"
+    }
+  ],
+  "routes": [
+    { "src": "/api/transcribe", "dest": "/api/transcribe.js" },
+    { "src": "/api/status", "dest": "/api/status.js" },
+    { "src": "/(.*)", "dest": "/public/$1" }
+  ],
+  "functions": {
+    "api/transcribe.js": {
+      "maxDuration": 60,
+      "memory": 1024
+    },
+    "api/status.js": {
+      "maxDuration": 30,
+      "memory": 512
+    }
+  },
+  "env": {
+    "ASSEMBLYAI_KEY": "@assemblyai_key",
+    "GROQ_KEY": "@groq_key"
+  }
+}
