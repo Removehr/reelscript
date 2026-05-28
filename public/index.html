@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ReelScript — Shorts & Reels Transcriber</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0C0C0F;
+    --bg2: #141418;
+    --bg3: #1C1C22;
+    --border: rgba(255,255,255,0.08);
+    --border2: rgba(255,255,255,0.14);
+    --text: #F0EEF8;
+    --muted: #7A7890;
+    --accent: #7C5CFC;
+    --accent2: #C084FC;
+    --orange: #FF6B35;
+    --green: #22C55E;
+    --radius: 12px;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Space Grotesk', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Background decoration */
+  body::before {
+    content: '';
+    position: fixed;
+    top: -200px; left: 50%; transform: translateX(-50%);
+    width: 800px; height: 500px;
+    background: radial-gradient(ellipse at center, rgba(124,92,252,0.12) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .page { max-width: 680px; margin: 0 auto; padding: 0 20px 80px; position: relative; z-index: 1; }
+
+  /* Header */
+  header { padding: 48px 0 40px; text-align: center; }
+  .logo-wrap { display: inline-flex; align-items: center; gap: 10px; margin-bottom: 20px; }
+  .logo-icon { width: 40px; height: 40px; background: linear-gradient(135deg, var(--accent), var(--accent2)); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 20px; }
+  .logo-name { font-size: 22px; font-weight: 700; letter-spacing: -0.5px; }
+  .logo-name span { color: var(--accent2); }
+
+  h1 { font-size: clamp(28px, 5vw, 40px); font-weight: 700; letter-spacing: -1px; line-height: 1.15; margin-bottom: 12px; }
+  h1 em { font-style: normal; background: linear-gradient(135deg, var(--accent), var(--accent2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .tagline { font-size: 15px; color: var(--muted); line-height: 1.6; }
+
+  /* Lang pills */
+  .lang-pills { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-top: 20px; }
+  .pill { padding: 5px 14px; border-radius: 99px; font-size: 12px; font-weight: 500; border: 1px solid var(--border2); color: var(--muted); font-family: 'JetBrains Mono', monospace; }
+  .pill.en { border-color: rgba(124,92,252,.4); color: #a78bfa; }
+  .pill.hi { border-color: rgba(255,107,53,.4); color: #fb923c; }
+  .pill.hl { border-color: rgba(34,197,94,.4); color: #4ade80; }
+
+  /* Card */
+  .card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; margin-bottom: 16px; }
+
+  /* Input */
+  .input-label { font-size: 12px; color: var(--muted); font-family: 'JetBrains Mono', monospace; text-transform: uppercase; letter-spacing: .6px; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+  .input-wrap { position: relative; }
+  .input-wrap input {
+    width: 100%; background: var(--bg3); border: 1px solid var(--border); border-radius: 10px;
+    padding: 14px 50px 14px 16px; font-size: 14px; color: var(--text); font-family: 'Space Grotesk', sans-serif;
+    outline: none; transition: border-color .2s;
+  }
+  .input-wrap input:focus { border-color: var(--accent); }
+  .input-wrap input::placeholder { color: var(--muted); }
+  .input-icon { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: 18px; pointer-events: none; }
+  .input-wrap input:not(:placeholder-shown) ~ .input-icon { color: var(--accent2); }
+
+  /* Lang selector */
+  .lang-selector { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 18px; }
+  .lang-opt { position: relative; cursor: pointer; }
+  .lang-opt input { position: absolute; opacity: 0; pointer-events: none; }
+  .lang-card {
+    display: flex; flex-direction: column; align-items: center; gap: 6px;
+    padding: 14px 8px; border-radius: 10px; border: 1px solid var(--border);
+    background: var(--bg3); transition: all .2s; text-align: center;
+  }
+  .lang-card:hover { border-color: var(--border2); }
+  .lang-opt input:checked + .lang-card { border-color: var(--accent); background: rgba(124,92,252,.08); }
+  .lang-card .flag { font-size: 24px; line-height: 1; }
+  .lang-card .lname { font-size: 13px; font-weight: 600; }
+  .lang-card .ldesc { font-size: 11px; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
+  .lang-check { display: none; position: absolute; top: 8px; right: 8px; width: 16px; height: 16px; background: var(--accent); border-radius: 50%; align-items: center; justify-content: center; font-size: 9px; }
+  .lang-opt input:checked ~ .lang-check { display: flex; }
+
+  /* CTA Button */
+  .btn-go {
+    width: 100%; margin-top: 20px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border: none; border-radius: 10px; padding: 15px 0;
+    font-size: 15px; font-weight: 600; color: #fff;
+    cursor: pointer; font-family: 'Space Grotesk', sans-serif;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    transition: opacity .2s, transform .1s; letter-spacing: -.2px;
+  }
+  .btn-go:hover { opacity: .9; }
+  .btn-go:active { transform: scale(.99); }
+  .btn-go:disabled { opacity: .4; cursor: not-allowed; transform: none; }
+
+  /* Progress */
+  .progress-card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; display: none; }
+  .progress-card.show { display: block; }
+  .prog-label { font-size: 13px; color: var(--muted); margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+  .prog-label i { color: var(--accent); animation: spin .8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .prog-bar { height: 4px; background: var(--bg3); border-radius: 99px; overflow: hidden; }
+  .prog-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent2)); border-radius: 99px; transition: width .4s ease; width: 0%; }
+  .prog-steps { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 14px; }
+  .step-chip { padding: 4px 10px; border-radius: 99px; font-size: 11px; font-family: 'JetBrains Mono', monospace; border: 1px solid var(--border); color: var(--muted); transition: all .3s; }
+  .step-chip.active { border-color: var(--accent); color: var(--accent2); background: rgba(124,92,252,.1); }
+  .step-chip.done { border-color: var(--green); color: var(--green); background: rgba(34,197,94,.08); }
+
+  /* Result */
+  .result-card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); display: none; overflow: hidden; }
+  .result-card.show { display: block; }
+  .result-header { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
+  .result-meta { display: flex; align-items: center; gap: 10px; }
+  .lang-badge { padding: 4px 12px; border-radius: 99px; font-size: 12px; font-weight: 600; font-family: 'JetBrains Mono', monospace; }
+  .lang-badge.en { background: rgba(124,92,252,.15); color: #a78bfa; border: 1px solid rgba(124,92,252,.3); }
+  .lang-badge.hi { background: rgba(255,107,53,.15); color: #fb923c; border: 1px solid rgba(255,107,53,.3); }
+  .lang-badge.hinglish { background: rgba(34,197,94,.15); color: #4ade80; border: 1px solid rgba(34,197,94,.3); }
+  .word-count { font-size: 12px; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
+  .result-actions { display: flex; align-items: center; gap: 10px; }
+  .ts-toggle { display: flex; align-items: center; gap: 6px; cursor: pointer; user-select: none; }
+  .ts-toggle input { display: none; }
+  .toggle-track { width: 36px; height: 20px; background: var(--bg3); border-radius: 99px; border: 1px solid var(--border2); position: relative; transition: background .2s; }
+  .toggle-thumb { width: 14px; height: 14px; background: var(--muted); border-radius: 50%; position: absolute; top: 2px; left: 2px; transition: all .2s; }
+  .ts-toggle input:checked ~ .toggle-track { background: rgba(124,92,252,.3); border-color: var(--accent); }
+  .ts-toggle input:checked ~ .toggle-track .toggle-thumb { left: 18px; background: var(--accent2); }
+  .ts-label { font-size: 12px; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
+  .btn-copy {
+    display: flex; align-items: center; gap: 6px; padding: 7px 14px;
+    background: transparent; border: 1px solid var(--border2); border-radius: 8px;
+    font-size: 12px; color: var(--text); cursor: pointer; font-family: 'Space Grotesk', sans-serif;
+    font-weight: 500; transition: all .2s;
+  }
+  .btn-copy:hover { border-color: var(--accent); color: var(--accent2); }
+  .btn-copy.copied { border-color: var(--green); color: var(--green); }
+  .transcript-body { padding: 20px; font-size: 14px; line-height: 1.85; color: var(--text); max-height: 420px; overflow-y: auto; white-space: pre-wrap; font-family: 'Space Grotesk', sans-serif; }
+  .transcript-body::-webkit-scrollbar { width: 4px; }
+  .transcript-body::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 99px; }
+  .ts-stamp { color: var(--accent); font-size: 11px; font-family: 'JetBrains Mono', monospace; font-weight: 500; margin-right: 8px; opacity: .8; }
+
+  /* Error */
+  .error-card { background: rgba(239,68,68,.08); border: 1px solid rgba(239,68,68,.25); border-radius: var(--radius); padding: 16px 20px; display: none; }
+  .error-card.show { display: flex; align-items: flex-start; gap: 10px; }
+  .error-card i { color: #ef4444; font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+  .error-msg { font-size: 13px; color: #fca5a5; line-height: 1.5; }
+
+  /* New transcript btn */
+  .btn-new { display: none; width: 100%; margin-top: 14px; background: transparent; border: 1px solid var(--border2); border-radius: 10px; padding: 12px 0; font-size: 14px; font-weight: 500; color: var(--muted); cursor: pointer; font-family: 'Space Grotesk', sans-serif; transition: all .2s; }
+  .btn-new:hover { color: var(--text); border-color: var(--border2); }
+  .btn-new.show { display: block; }
+
+  /* Supported platforms note */
+  .platforms { text-align: center; margin-top: 14px; font-size: 12px; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
+  .platforms span { opacity: .6; }
+
+  /* Footer */
+  footer { text-align: center; padding: 30px 0 0; font-size: 12px; color: var(--muted); font-family: 'JetBrains Mono', monospace; border-top: 1px solid var(--border); margin-top: 40px; }
+</style>
+</head>
+<body>
+<div class="page">
+  <header>
+    <div class="logo-wrap">
+      <div class="logo-icon">🎬</div>
+      <div class="logo-name">Reel<span>Script</span></div>
+    </div>
+    <h1>Transcribe any<br><em>Short or Reel</em> instantly</h1>
+    <p class="tagline">Paste a YouTube Shorts, Instagram Reel, or TikTok link.<br>Get a clean transcript in seconds — no signup needed.</p>
+    <div class="lang-pills">
+      <span class="pill en">🇬🇧 English</span>
+      <span class="pill hi">🇮🇳 Hindi</span>
+      <span class="pill hl">💬 Hinglish</span>
+    </div>
+  </header>
+
+  <!-- Input Card -->
+  <div class="card" id="inputCard">
+    <div class="input-label"><i class="ti ti-link"></i> Video Link</div>
+    <div class="input-wrap">
+      <input type="url" id="videoUrl" placeholder="https://youtube.com/shorts/... or instagram.com/reels/..." autocomplete="off" spellcheck="false">
+      <span class="input-icon ti ti-brand-youtube"></span>
+    </div>
+
+    <div style="margin-top:20px">
+      <div class="input-label"><i class="ti ti-language"></i> Transcript Language</div>
+      <div class="lang-selector">
+        <label class="lang-opt">
+          <input type="radio" name="lang" value="english" checked>
+          <div class="lang-card">
+            <span class="flag">🇬🇧</span>
+            <span class="lname">English</span>
+            <span class="ldesc">as spoken</span>
+          </div>
+          <span class="lang-check ti ti-check"></span>
+        </label>
+        <label class="lang-opt">
+          <input type="radio" name="lang" value="hindi">
+          <div class="lang-card">
+            <span class="flag">🇮🇳</span>
+            <span class="lname">हिन्दी</span>
+            <span class="ldesc">Hindi script</span>
+          </div>
+          <span class="lang-check ti ti-check"></span>
+        </label>
+        <label class="lang-opt">
+          <input type="radio" name="lang" value="hinglish">
+          <div class="lang-card">
+            <span class="flag">💬</span>
+            <span class="lname">Hinglish</span>
+            <span class="ldesc">WhatsApp style</span>
+          </div>
+          <span class="lang-check ti ti-check"></span>
+        </label>
+      </div>
+    </div>
+
+    <button class="btn-go" id="btnGo" onclick="doTranscribe()">
+      <i class="ti ti-wand"></i> Generate Transcript
+    </button>
+    <div class="platforms"><span>Supports: YouTube Shorts · Instagram Reels · TikTok · Facebook Reels</span></div>
+  </div>
+
+  <!-- Progress -->
+  <div class="progress-card" id="progressCard">
+    <div class="prog-label"><i class="ti ti-loader-2"></i> <span id="progMsg">Starting…</span></div>
+    <div class="prog-bar"><div class="prog-fill" id="progFill"></div></div>
+    <div class="prog-steps">
+      <span class="step-chip" id="s1">Fetching video</span>
+      <span class="step-chip" id="s2">Extracting audio</span>
+      <span class="step-chip" id="s3">Transcribing speech</span>
+      <span class="step-chip" id="s4">Processing language</span>
+      <span class="step-chip" id="s5">Done</span>
+    </div>
+  </div>
+
+  <!-- Error -->
+  <div class="error-card" id="errorCard">
+    <i class="ti ti-alert-circle"></i>
+    <div class="error-msg" id="errorMsg">Something went wrong. Please try again.</div>
+  </div>
+
+  <!-- Result -->
+  <div class="result-card" id="resultCard">
+    <div class="result-header">
+      <div class="result-meta">
+        <span class="lang-badge" id="langBadge">EN</span>
+        <span class="word-count" id="wordCount">0 words</span>
+      </div>
+      <div class="result-actions">
+        <label class="ts-toggle" title="Show timestamps">
+          <input type="checkbox" id="tsCheck" onchange="toggleTimestamps()">
+          <div class="toggle-track"><div class="toggle-thumb"></div></div>
+          <span class="ts-label">Timestamps</span>
+        </label>
+        <button class="btn-copy" id="btnCopy" onclick="copyTranscript()">
+          <i class="ti ti-copy"></i> Copy
+        </button>
+      </div>
+    </div>
+    <div class="transcript-body" id="transcriptOut"></div>
+  </div>
+
+  <button class="btn-new" id="btnNew" onclick="resetTool()">
+    <i class="ti ti-refresh"></i> Transcribe another video
+  </button>
+
+  <footer>Built with AssemblyAI · Groq (Llama 3.3 70B) · Deployed free on Vercel</footer>
+</div>
+
+<script>
+let rawText = '';
+let rawWords = [];
+let currentLang = 'english';
+
+function setProgress(pct, msg, stepIdx) {
+  document.getElementById('progFill').style.width = pct + '%';
+  document.getElementById('progMsg').textContent = msg;
+  const steps = ['s1','s2','s3','s4','s5'];
+  steps.forEach((s, i) => {
+    const el = document.getElementById(s);
+    el.className = 'step-chip' + (i < stepIdx ? ' done' : i === stepIdx ? ' active' : '');
+  });
+}
+
+async function doTranscribe() {
+  const url = document.getElementById('videoUrl').value.trim();
+  if (!url) { shakeInput(); return; }
+  currentLang = document.querySelector('input[name="lang"]:checked').value;
+
+  document.getElementById('inputCard').style.opacity = '.4';
+  document.getElementById('inputCard').style.pointerEvents = 'none';
+  document.getElementById('btnGo').disabled = true;
+  document.getElementById('progressCard').classList.add('show');
+  document.getElementById('resultCard').classList.remove('show');
+  document.getElementById('errorCard').classList.remove('show');
+  document.getElementById('btnNew').classList.remove('show');
+
+  setProgress(10, 'Fetching video info…', 0);
+
+  try {
+    const resp = await fetch('/api/transcribe', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ url, lang: currentLang })
+    });
+    const data = await resp.json();
+    if (!resp.ok) throw new Error(data.error || 'Transcription failed');
+
+    setProgress(50, 'Transcribing audio…', 2);
+
+    // Poll for result
+    const jobId = data.jobId;
+    let result = null;
+    for (let i = 0; i < 90; i++) {
+      await sleep(3000);
+      const poll = await fetch('/api/status?id=' + jobId);
+      const pj = await poll.json();
+      const p = Math.min(50 + i * 0.8, 88);
+      if (pj.status === 'completed') {
+        setProgress(92, 'Processing language…', 3);
+        result = pj;
+        break;
+      }
+      if (pj.status === 'error') throw new Error(pj.error || 'Transcription error');
+      if (pj.status === 'processing') setProgress(p, 'Transcribing speech… hang tight!', 2);
+      if (pj.status === 'queued') setProgress(p, 'Queued — starting soon…', 1);
+    }
+    if (!result) throw new Error('Timed out. Please try a shorter video.');
+
+    rawText = result.text || '';
+    rawWords = result.words || [];
+
+    if (currentLang === 'hinglish' && result.hinglishText) {
+      rawText = result.hinglishText;
+    } else if (currentLang === 'hindi' && result.hindiText) {
+      rawText = result.hindiText;
+    }
+
+    setProgress(100, 'Done!', 4);
+    await sleep(500);
+    document.getElementById('progressCard').classList.remove('show');
+    showResult();
+
+  } catch (err) {
+    document.getElementById('progressCard').classList.remove('show');
+    document.getElementById('errorCard').classList.add('show');
+    document.getElementById('errorMsg').textContent = err.message;
+    document.getElementById('inputCard').style.opacity = '1';
+    document.getElementById('inputCard').style.pointerEvents = 'auto';
+    document.getElementById('btnGo').disabled = false;
+    document.getElementById('btnNew').classList.add('show');
+  }
+}
+
+function showResult() {
+  const langMap = { english: ['EN', 'en'], hindi: ['HI', 'hi'], hinglish: ['Hinglish', 'hinglish'] };
+  const [label, cls] = langMap[currentLang] || ['EN', 'en'];
+  const badge = document.getElementById('langBadge');
+  badge.textContent = label;
+  badge.className = 'lang-badge ' + cls;
+  const wc = rawText.trim().split(/\s+/).length;
+  document.getElementById('wordCount').textContent = wc + ' words';
+  document.getElementById('tsCheck').checked = false;
+  renderTranscript(false);
+  document.getElementById('resultCard').classList.add('show');
+  document.getElementById('btnNew').classList.add('show');
+  document.getElementById('inputCard').style.opacity = '1';
+  document.getElementById('inputCard').style.pointerEvents = 'auto';
+}
+
+function renderTranscript(withTs) {
+  const out = document.getElementById('transcriptOut');
+  if (!withTs || !rawWords.length) {
+    out.textContent = rawText;
+    return;
+  }
+  out.innerHTML = '';
+  const chunkSize = 15;
+  for (let i = 0; i < rawWords.length; i += chunkSize) {
+    const chunk = rawWords.slice(i, i + chunkSize);
+    const ms = chunk[0].start;
+    const s = Math.floor(ms / 1000);
+    const m = Math.floor(s / 60);
+    const ss = String(s % 60).padStart(2, '0');
+    const tsStr = `${m}:${ss}`;
+    const span = document.createElement('span');
+    span.className = 'ts-stamp';
+    span.textContent = `[${tsStr}]`;
+    out.appendChild(span);
+    out.appendChild(document.createTextNode(chunk.map(w => w.text).join(' ') + '\n'));
+  }
+}
+
+function toggleTimestamps() {
+  renderTranscript(document.getElementById('tsCheck').checked);
+}
+
+async function copyTranscript() {
+  const text = document.getElementById('transcriptOut').innerText;
+  await navigator.clipboard.writeText(text);
+  const btn = document.getElementById('btnCopy');
+  btn.classList.add('copied');
+  btn.innerHTML = '<i class="ti ti-check"></i> Copied!';
+  setTimeout(() => {
+    btn.classList.remove('copied');
+    btn.innerHTML = '<i class="ti ti-copy"></i> Copy';
+  }, 2000);
+}
+
+function resetTool() {
+  document.getElementById('videoUrl').value = '';
+  document.getElementById('resultCard').classList.remove('show');
+  document.getElementById('errorCard').classList.remove('show');
+  document.getElementById('btnNew').classList.remove('show');
+  document.getElementById('btnGo').disabled = false;
+  rawText = ''; rawWords = [];
+  document.querySelector('input[name="lang"][value="english"]').checked = true;
+}
+
+function shakeInput() {
+  const inp = document.getElementById('videoUrl');
+  inp.style.borderColor = '#ef4444';
+  inp.placeholder = 'Please paste a video link first…';
+  setTimeout(() => { inp.style.borderColor = ''; inp.placeholder = 'https://youtube.com/shorts/...'; }, 2000);
+}
+
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+</script>
+</body>
+</html>
